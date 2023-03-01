@@ -1,5 +1,5 @@
 # SPProject
-Analysis of UI-trees implemented for the Сathedra of System Programming of the CMC MSU.
+Analysis of UI-trees implemented for the Department of System Programming of the CMC MSU.
 
 ### ANSWERS
 Number of applications in the dataset: 9384.  
