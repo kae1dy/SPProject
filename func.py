@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from collections import deque
 
 
 def analysis_data(data_dir="./data/filtered_traces", json_name="gestures.json",
@@ -38,12 +39,12 @@ def analysis_data(data_dir="./data/filtered_traces", json_name="gestures.json",
             else:
                 print(f"{str(app)} have incorrect dataset.")
 
-            # check depth of each {NumberUI}.json
+            # check depth of every {NumberUI}.json
             for tree in hierarchies.iterdir():
                 with open(tree) as file:
                     tree_json = json.load(file)
                 try:
-                    tmp = max_depth_recursive(tree_json["activity"]["root"], key)
+                    tmp = max_depth_deq(tree_json["activity"]["root"], key)
                     if max_depth < tmp:
                         max_depth = tmp
                         max_app = str(app)
@@ -60,8 +61,8 @@ def analysis_data(data_dir="./data/filtered_traces", json_name="gestures.json",
 
     return traces_len
 
-
-def max_depth_recursive(tree_json: dict, key: str):
+# find max_depth UI-tree (recursive)
+def max_depth_recursive(tree_json: dict, key: str) -> int:
     if not tree_json:
         return 0
     if key not in tree_json:
@@ -73,3 +74,31 @@ def max_depth_recursive(tree_json: dict, key: str):
         max_depth = max(temp, max_depth)
 
     return max_depth + 1
+
+
+# find max_depth UI-tree (with deque)
+def max_depth_deq(root: dict, key: str) -> int:
+    if not root:
+        return 0
+    list_nodes = deque([root])
+    list_size = 1
+
+    node_level = 1
+    levels = 0
+
+    while list_nodes:
+        node = list_nodes.popleft()
+        list_size -= 1
+
+        if key in node:
+            for children in node[key]:
+
+                if children:
+                    list_nodes.append(children)
+                    list_size += 1
+
+        node_level -= 1
+        if node_level == 0:
+            levels += 1
+            node_level = list_size
+    return levels
